@@ -22,8 +22,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 // Rutas para el controlador de usuarios, asignando nombres personalizados
 
 
-// Proteger todas las rutas de usuarios con auth:sanctum excepto el formulario de testing
-Route::prefix('usuarios')->middleware(['auth:sanctum', 'validate.origin'])->group(function () {
+// Proteger todas las rutas de usuarios con identify.tenant, auth:sanctum y validate.origin
+Route::prefix('usuarios')->middleware(['identify.tenant', 'auth:sanctum', 'validate.origin'])->group(function () {
     Route::get('/listUsers', [UsuarioController::class, 'index']);
     Route::post('/addUser', [UsuarioController::class, 'store']);
     Route::get('/getUser/{id}', [UsuarioController::class, 'show']);
@@ -33,15 +33,19 @@ Route::prefix('usuarios')->middleware(['auth:sanctum', 'validate.origin'])->grou
 // Mantener pública solo la ruta de formulario de testing
 Route::get('/usuarios/addUser', [UsuarioController::class, 'createUserForm']);
 
-Route::post('/register', [AuthController::class, 'register']);
-// Limitar a 5 intentos por minuto para evitar fuerza bruta
-Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
-Route::get('/login', [AuthController::class, 'loginForm']); // Para testing desde navegador
-Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
+
+// Agrupar rutas de autenticación bajo identify.tenant
+Route::middleware(['identify.tenant'])->group(function () {
+    Route::post('/register', [AuthController::class, 'register']);
+    // Limitar a 5 intentos por minuto para evitar fuerza bruta
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
+    Route::get('/login', [AuthController::class, 'loginForm']); // Para testing desde navegador
+    Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
+});
 
 
-// Proteger todas las rutas de tareas con auth:sanctum
-Route::prefix('tareas')->middleware(['auth:sanctum', 'validate.origin'])->group(function () {
+// Proteger todas las rutas de tareas con identify.tenant, auth:sanctum y validate.origin
+Route::prefix('tareas')->middleware(['identify.tenant', 'auth:sanctum', 'validate.origin'])->group(function () {
     Route::get('/', [TareaController::class, 'index']);
     Route::post('/', [TareaController::class, 'store']);
     Route::get('/usuarios', [TareaController::class, 'getUsers']); // Para obtener usuarios para el selector

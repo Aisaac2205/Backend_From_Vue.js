@@ -46,7 +46,8 @@ return [
     |
     */
 
-    'expiration' => null,
+    // Expiración de tokens en minutos (ejemplo: 1440 = 1 día)
+    'expiration' => env('SANCTUM_TOKEN_EXPIRATION', 1440),
 
     /*
     |--------------------------------------------------------------------------

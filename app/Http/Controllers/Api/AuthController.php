@@ -39,6 +39,7 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
+
         $request->validate([
             'email'    => 'required|email',
             'password' => 'required|string',
@@ -47,6 +48,12 @@ class AuthController extends Controller
         $usuario = Usuario::where('email', $request->email)->first();
 
         if (! $usuario || ! Hash::check($request->password, $usuario->password)) {
+            // Registrar intento fallido en los logs
+            \Log::warning('Intento fallido de login', [
+                'email' => $request->email,
+                'ip' => $request->ip(),
+                'fecha' => now()->toDateTimeString()
+            ]);
             throw ValidationException::withMessages([
                 'email' => ['Credenciales inválidas.'],
             ]);

@@ -145,9 +145,44 @@ curl -X POST http://localhost:8000/api/tareas/ \
 
 ## Seguridad
 
-- Autenticación con Sanctum y tokens personales (`createToken`)
-- Validación exhaustiva en controladores (respuestas 422 con detalles)
-- Campos sensibles ocultos en respuestas (`$hidden`)
+### Mejoras de Seguridad (2025-09)
+
+- **Todas las rutas CRUD protegidas**: Las rutas de usuarios y tareas requieren token válido (`auth:sanctum`). Si el token es inválido o expirado, la API responde con **401 Unauthorized**.
+- **Rate limiting en login**: El endpoint `POST /api/login` está limitado a 5 intentos por minuto para evitar ataques de fuerza bruta (`throttle:5,1`).
+- **Revocación de tokens en logout**: El endpoint `POST /api/logout` revoca todos los tokens activos del usuario, impidiendo su reutilización.
+- **Tokens hasheados**: Los tokens personales se almacenan hasheados en la base de datos (`personal_access_tokens`).
+- **Expiración configurable de tokens**: Los tokens expiran automáticamente tras un periodo configurable (por defecto 1 día, ajustable con la variable `SANCTUM_TOKEN_EXPIRATION` en `.env`).
+- **CORS restringido**: Solo se permite el origen configurado en la variable `FRONTEND_URL` (por defecto `http://localhost:5173`).
+- **Validación robusta de inputs**: Todos los endpoints de login y registro validan exhaustivamente los datos recibidos.
+- **Registro de intentos fallidos de login**: Cada intento fallido de login se registra en los logs del sistema, incluyendo email, IP y fecha.
+- **Middleware de origen**: Se añadió un middleware personalizado (`validate.origin`) que valida el encabezado `Origin` en rutas protegidas, bloqueando peticiones de orígenes no autorizados.
+
+#### Variables de entorno relevantes
+
+```
+FRONTEND_URL=http://localhost:5173         # Origen permitido para CORS y middleware
+SANCTUM_TOKEN_EXPIRATION=1440              # Expiración de tokens en minutos (1 día por defecto)
+```
+
+#### Ejemplo de respuesta 401 por token inválido/expirado
+```json
+{
+  "message": "Unauthenticated."
+}
+```
+
+#### Ejemplo de respuesta 403 por origen no permitido
+```json
+{
+  "message": "Origen no permitido."
+}
+```
+
+#### Notas adicionales
+- El rate limiting en login es automático y retorna HTTP 429 si se excede el límite.
+- El middleware de origen se aplica a todas las rutas protegidas (`usuarios` y `tareas`).
+- Los tokens se revocan en logout usando `$request->user()->tokens()->delete()`.
+- Los intentos fallidos de login quedan registrados en los logs de Laravel (`storage/logs/laravel.log`).
 
 ## Exportación a Excel
 

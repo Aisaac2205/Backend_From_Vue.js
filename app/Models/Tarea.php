@@ -4,10 +4,22 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Traits\TenantScope;
+
 
 class Tarea extends Model
 {
-    use HasFactory;
+    use HasFactory, TenantScope;
+
+    // Usar la conexión dinámica del tenant
+    protected $connection = null;
+
+    public function __construct(array $attributes = [])
+    {
+        parent::__construct($attributes);
+        // Asignar la conexión actual del tenant
+        $this->connection = config('database.default');
+    }
 
     protected $fillable = [
         'titulo',

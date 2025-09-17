@@ -21,22 +21,27 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 // Rutas para el controlador de usuarios, asignando nombres personalizados
 
-Route::prefix('usuarios')->group(function () {
+
+// Proteger todas las rutas de usuarios con auth:sanctum excepto el formulario de testing
+Route::prefix('usuarios')->middleware(['auth:sanctum', 'validate.origin'])->group(function () {
     Route::get('/listUsers', [UsuarioController::class, 'index']);
     Route::post('/addUser', [UsuarioController::class, 'store']);
-    Route::get('/addUser', [UsuarioController::class, 'createUserForm']); // Para testing desde navegador
     Route::get('/getUser/{id}', [UsuarioController::class, 'show']);
     Route::put('/updateUser/{id}', [UsuarioController::class, 'update']);
     Route::delete('/deleteUser/{id}', [UsuarioController::class, 'destroy']);
 });
+// Mantener pública solo la ruta de formulario de testing
+Route::get('/usuarios/addUser', [UsuarioController::class, 'createUserForm']);
 
 Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+// Limitar a 5 intentos por minuto para evitar fuerza bruta
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
 Route::get('/login', [AuthController::class, 'loginForm']); // Para testing desde navegador
 Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
 
-// Rutas para tareas
-Route::prefix('tareas')->group(function () {
+
+// Proteger todas las rutas de tareas con auth:sanctum
+Route::prefix('tareas')->middleware(['auth:sanctum', 'validate.origin'])->group(function () {
     Route::get('/', [TareaController::class, 'index']);
     Route::post('/', [TareaController::class, 'store']);
     Route::get('/usuarios', [TareaController::class, 'getUsers']); // Para obtener usuarios para el selector

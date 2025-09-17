@@ -1,3 +1,4 @@
+
 <?php
 
 namespace App\Http;
@@ -65,5 +66,6 @@ class Kernel extends HttpKernel
     'validate.origin' => \App\Http\Middleware\ValidateOrigin::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+        'identify.tenant' => \App\Http\Middleware\IdentifyTenant::class,
     ];
 }

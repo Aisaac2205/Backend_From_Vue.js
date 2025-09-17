@@ -1,3 +1,43 @@
+## Multitenancy por subdominio
+
+### ¿Cómo funciona?
+El backend detecta el subdominio de cada petición (por ejemplo, `empresa1.midominio.com`) y conecta automáticamente a la base de datos correspondiente a ese tenant. Cada tenant tiene su propio esquema de base de datos y sus datos están completamente aislados.
+
+### Crear un nuevo tenant
+Ejecuta el siguiente comando para crear la base de datos, usuario y ejecutar migraciones para un nuevo tenant:
+
+```bash
+php artisan tenant:create empresa1 --database=tenant_empresa1 --user=tenant_empresa1 --password=claveSegura
+```
+O simplemente:
+```bash
+php artisan tenant:create empresa1
+```
+Esto creará:
+- Base de datos: `tenant_empresa1`
+- Usuario: `tenant_empresa1`
+- Contraseña: `secret123` (por defecto, cámbiala en producción)
+
+### Ejemplo de request multitenant
+Supón que tienes dos tenants:
+- `empresa1.midominio.com` (base de datos: `tenant_empresa1`)
+- `empresa2.midominio.com` (base de datos: `tenant_empresa2`)
+
+Cuando un usuario accede a la API desde `empresa1.midominio.com`, solo verá y manipulará los datos de su tenant.
+
+### Consideraciones
+- Todas las rutas protegidas y de autenticación requieren el subdominio correcto.
+- El middleware `identify.tenant` asegura el aislamiento de datos.
+- Puedes agregar nuevos tenants fácilmente ejecutando el comando anterior.
+- El sistema es compatible con despliegue en AWS y dominios wildcard.
+
+### Seguridad
+- Cada tenant tiene su propio usuario y contraseña de base de datos.
+- Los tokens de autenticación son válidos solo en el contexto del tenant.
+
+### Recomendaciones para producción
+- Usa certificados SSL wildcard para proteger todos los subdominios.
+- Configura correctamente los DNS y el balanceador de carga para soportar subdominios dinámicos.
 # Laravel API - Gestión de Usuarios y Tareas
 
 API REST en Laravel para gestionar Usuarios y Tareas, con autenticación por tokens (Sanctum), validación robusta y exportación a Excel.

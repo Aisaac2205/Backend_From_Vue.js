@@ -11,17 +11,8 @@ class Tarea extends Model
 {
     use HasFactory, TenantScope;
 
-    // Usar la conexión dinámica del tenant
-    protected $connection = null;
-
-    public function __construct(array $attributes = [])
-    {
-        parent::__construct($attributes);
-        // Asignar la conexión actual del tenant
-        $this->connection = config('database.default');
-    }
-
     protected $fillable = [
+        'tenant_id', // Agregar tenant_id para multitenancy
         'titulo',
         'descripcion',
         'estado',

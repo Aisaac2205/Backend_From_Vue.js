@@ -13,19 +13,10 @@ class Usuario extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, TenantScope;
 
-    // Usar la conexión dinámica del tenant
-    protected $connection = null;
-
-    public function __construct(array $attributes = [])
-    {
-        parent::__construct($attributes);
-        // Asignar la conexión actual del tenant
-        $this->connection = config('database.default');
-    }
-
     protected $table = 'usuarios'; // Nombre exacto de la tabla
 
     protected $fillable = [
+        'tenant_id', // Agregar tenant_id para multitenancy
         'nombre',
         'email',
         'password',

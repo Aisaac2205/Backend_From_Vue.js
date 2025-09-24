@@ -1,3 +1,78 @@
+# Laravel API - Gestión de Usuarios y Tareas (Multitenancy y Seguridad)
+
+API REST en Laravel para gestionar Usuarios y Tareas, con autenticación por tokens (Sanctum), validación robusta, exportación a Excel y soporte multitenancy por subdominio.
+---
+
+## Tabla de Contenidos
+- [¿Cómo funciona el multitenancy?](#cómo-funciona-el-multitenancy)
+- [Arquitectura y Seguridad](#arquitectura-y-seguridad)
+- [Requisitos](#requisitos)
+- [Instalación y Configuración](#instalación-y-configuración)
+- [Rutas y Endpoints](#rutas-y-endpoints)
+- [Modelos y Relaciones](#modelos-y-relaciones)
+- [Exportación a Excel](#exportación-a-excel)
+- [Estructura del Proyecto](#estructura-del-proyecto-principal)
+- [Comandos útiles](#comandos-útiles)
+- [Licencia](#licencia)
+
+---
+## ¿Cómo funciona el multitenancy?
+
+El backend detecta el subdominio de cada petición (por ejemplo, `empresa1.midominio.com`) y conecta automáticamente a la base de datos correspondiente a ese tenant. Cada tenant tiene su propio esquema de base de datos y sus datos están completamente aislados.
+### Crear un nuevo tenant
+
+Ejecuta el siguiente comando para crear la base de datos, usuario y ejecutar migraciones para un nuevo tenant:
+### Ejemplo de request multitenant
+
+Supón que tienes dos tenants:
+### Consideraciones
+
+- Todas las rutas protegidas y de autenticación requieren el subdominio correcto.
+- El middleware `identify.tenant` asegura el aislamiento de datos.
+### Seguridad
+
+- **Todas las rutas CRUD protegidas:** Solo accesibles con token válido (`auth:sanctum`).
+- **Tokens únicos, hasheados y con expiración:** Generados por usuario/sesión, almacenados hasheados, expiración configurable (`SANCTUM_TOKEN_EXPIRATION`).
+#### Variables de entorno relevantes
+
+```
+#### Ejemplo de respuesta 401 por token inválido/expirado
+
+```json
+#### Ejemplo de respuesta 403 por origen no permitido
+
+```json
+## Requisitos
+
+- PHP 8.1+
+- MySQL/MariaDB
+## Instalación y Configuración
+
+1. **Clonar e instalar dependencias**
+## Rutas y Endpoints
+
+### Autenticación
+### Usuarios
+
+- `GET /api/usuarios/listUsers` → Listar usuarios
+### Tareas
+
+- `GET /api/tareas/` → Listar tareas (incluye usuario relacionado: `id,nombre,email`)
+## Modelos y Relaciones
+
+- `App\Models\Usuario` (Authenticatable)
+## Exportación a Excel
+
+- Endpoint: `GET /api/tareas/report-pendientes`
+## Estructura del Proyecto (principal)
+
+```
+## Comandos útiles
+
+```bash
+## Licencia
+
+MIT.
 ## Multitenancy por subdominio
 
 ### ¿Cómo funciona?

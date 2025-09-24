@@ -1,6 +1,4 @@
-
 <?php
-
 namespace App\Http;
 
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
@@ -40,6 +38,7 @@ class Kernel extends HttpKernel
         ],
 
         'api' => [
+            \App\Http\Middleware\SecurityHeaders::class, // Headers de seguridad para producción
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
@@ -62,10 +61,11 @@ class Kernel extends HttpKernel
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'password.confirm' => \Illuminate\Auth\Middleware\RequirePassword::class,
         'precognitive' => \Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests::class,
-    'signed' => \App\Http\Middleware\ValidateSignature::class,
-    'validate.origin' => \App\Http\Middleware\ValidateOrigin::class,
+        'signed' => \App\Http\Middleware\ValidateSignature::class,
+        'validate.origin' => \App\Http\Middleware\ValidateOrigin::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'identify.tenant' => \App\Http\Middleware\IdentifyTenant::class,
+        'security.headers' => \App\Http\Middleware\SecurityHeaders::class,
     ];
 }

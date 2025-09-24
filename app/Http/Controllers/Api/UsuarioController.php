@@ -15,7 +15,10 @@ class UsuarioController extends Controller
      */
     public function index()
     {
-        return response()->json(Usuario::select('id', 'nombre', 'email', 'rol', 'created_at')->get());
+        return response()->json([
+            'success' => true,
+            'data' => Usuario::select('id', 'name', 'email', 'role', 'created_at')->get()
+        ]);
     }
 
     /**
@@ -35,9 +38,10 @@ class UsuarioController extends Controller
             'message' => 'Para crear un usuario, usa POST /api/usuarios/addUser',
             'endpoint' => 'POST /api/usuarios/addUser',
             'example' => [
-                'nombre' => 'Isaac Admin',
+                'name' => 'Isaac Admin',
                 'email' => 'isaac@isaac.com',
                 'password' => '123456',
+                'role' => 'user',
                 'rol' => 'admin'
             ],
             'note' => 'Usa Postman o curl para enviar la petición POST'

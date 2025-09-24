@@ -17,9 +17,13 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->string('role')->default('user');
+            $table->enum('role', ['admin', 'editor', 'user'])->default('user');
             $table->rememberToken();
             $table->timestamps();
+            
+            // Índices para mejor rendimiento
+            $table->index('email');
+            $table->index('role');
         });
     }
 

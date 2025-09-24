@@ -106,6 +106,13 @@ systemctl reload apache2
 
 ## 🔑 APIs Principales
 
+### 👤 **Usuarios por Defecto en Cada Tenant:**
+```
+🔐 Administrador: admin@admin.com / admin123
+👤 Usuario Demo: usuario@demo.com / demo123  
+✏️ Editor Demo: editor@demo.com / editor123
+```
+
 ### Gestión de Tenants (Dominio Principal)
 ```bash
 # Crear tenant
@@ -126,10 +133,15 @@ GET /api/admin/tenants/empresa1
 ### APIs de Tenant (Subdominio)
 ```bash
 # Desde empresa1.dominio.com
-POST /api/auth/register
 POST /api/auth/login
-GET /api/usuarios/listUsers
-POST /api/tareas
+{
+    "email": "admin@admin.com",
+    "password": "admin123"
+}
+
+GET /api/usuarios/listUsers (requiere auth)
+POST /api/usuarios/addUser (requiere rol admin)
+POST /api/tareas (requiere auth)
 ```
 
 ## 🔒 Seguridad Implementada

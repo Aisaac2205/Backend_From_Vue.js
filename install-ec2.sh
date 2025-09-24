@@ -152,6 +152,13 @@ cd $PROJECT_DIR
 php artisan tenant:create demo "Empresa Demo" demo
 
 echo ""
+echo "🔐 Información de usuarios por defecto:"
+echo "   📧 Admin: admin@admin.com"
+echo "   🔑 Password: admin123"
+echo "   👤 Usuario: usuario@demo.com / demo123"
+echo "   ✏️ Editor: editor@demo.com / editor123"
+
+echo ""
 echo "🎉 ¡Instalación completada!"
 echo ""
 echo "🌐 URLs disponibles:"

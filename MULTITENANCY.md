@@ -194,7 +194,17 @@ mysql -u root -p -e "SHOW DATABASES LIKE 'tenant_test';"
 
 # Verificar tablas del tenant
 mysql -u root -p tenant_test -e "SHOW TABLES;"
+
+# Verificar usuarios creados
+mysql -u root -p tenant_test -e "SELECT name, email, role FROM usuarios;"
 ```
+
+### 3. **Usuarios por Defecto Creados:**
+
+Cada tenant automáticamente incluye:
+- **👑 Administrador:** `admin@admin.com` / `admin123`
+- **👤 Usuario Demo:** `usuario@demo.com` / `demo123`
+- **✏️ Editor Demo:** `editor@demo.com` / `editor123`
 
 ### 3. Probar APIs
 

@@ -18,7 +18,22 @@ use App\Http\Controllers\TenantController;
 */
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+    $user = $request->user();
+    return response()->json([
+        'success' => true,
+        'data' => [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => $user->role,
+            'is_admin' => $user->role === 'admin',
+            'permissions' => [
+                'can_create_users' => in_array($user->role, ['admin', 'editor']),
+                'can_delete_users' => $user->role === 'admin',
+                'can_manage_tenants' => $user->role === 'admin',
+            ]
+        ]
+    ]);
 });
 // Rutas para el controlador de usuarios, asignando nombres personalizados
 
@@ -26,9 +41,11 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 // Proteger todas las rutas de usuarios con identify.tenant, auth:sanctum y validate.origin
 Route::prefix('usuarios')->middleware(['identify.tenant', 'auth:sanctum', 'validate.origin'])->group(function () {
     Route::get('/listUsers', [UsuarioController::class, 'index']);
-    Route::post('/addUser', [UsuarioController::class, 'store']);
     Route::get('/getUser/{id}', [UsuarioController::class, 'show']);
-    Route::put('/updateUser/{id}', [UsuarioController::class, 'update']);
+    
+    // Solo administradores y editores pueden crear usuarios
+    Route::post('/addUser', [UsuarioController::class, 'store'])->middleware('admin');
+    Route::put('/updateUser/{id}', [UsuarioController::class, 'update'])->middleware('admin');
     Route::delete('/deleteUser/{id}', [UsuarioController::class, 'destroy']);
 });
 // Mantener pública solo la ruta de formulario de testing

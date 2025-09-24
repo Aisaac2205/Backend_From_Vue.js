@@ -119,6 +119,13 @@ class Tenant extends Model
             '--path' => 'database/migrations/tenant',
             '--force' => true
         ]);
+        
+        // Ejecutar seeders del tenant (usuario admin por defecto)
+        Artisan::call('db:seed', [
+            '--database' => 'tenant',
+            '--class' => 'TenantSeeder',
+            '--force' => true
+        ]);
     }
 
     /**

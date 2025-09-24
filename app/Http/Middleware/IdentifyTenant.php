@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use App\Models\Tenant;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
@@ -11,7 +12,7 @@ class IdentifyTenant
 {
     /**
      * Maneja la solicitud entrante y establece el contexto del tenant según el subdominio.
-     * Opción 1: Una sola BD con tenant_id para separar datos - VERSIÓN SEGURA PARA PRODUCCIÓN.
+     * Sistema Multi-Tenant con bases de datos separadas por tenant.
      */
     public function handle(Request $request, Closure $next)
     {
@@ -21,44 +22,73 @@ class IdentifyTenant
         $baseDomain = env('BASE_DOMAIN', 'ec2-18-219-51-191.us-east-2.compute.amazonaws.com');
         
         // Extraer subdominio con validación de seguridad
-        $tenantId = $this->extractTenantId($host, $baseDomain);
+        $subdomain = $this->extractSubdomain($host, $baseDomain);
         
-        // Validar que el tenant_id sea seguro (solo alfanumérico, guiones y guiones bajos)
-        if ($tenantId && !preg_match('/^[a-zA-Z0-9_-]{1,50}$/', $tenantId)) {
-            Log::warning('Tenant ID inválido detectado', [
+        if (!$subdomain) {
+            // Sin subdominio, usar la aplicación principal (BD central)
+            return $next($request);
+        }
+        
+        // Validar que el subdominio sea seguro
+        if (!preg_match('/^[a-zA-Z0-9_-]{1,50}$/', $subdomain)) {
+            Log::warning('Subdominio inválido detectado', [
                 'host' => $host,
-                'tenant_id' => $tenantId,
+                'subdomain' => $subdomain,
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent()
             ]);
-            abort(400, 'Tenant no válido');
+            abort(400, 'Subdominio no válido');
         }
         
-        // Usar tenant por defecto si no se encuentra uno válido
-        $finalTenantId = $tenantId ?: 'default';
+        // Buscar tenant en BD central
+        $tenant = Tenant::findBySubdomain($subdomain);
         
-        // Establecer el tenant en el contenedor de servicios
-        app()->instance('currentTenant', $finalTenantId);
-        
-        // También lo guardamos en el request para fácil acceso
-        $request->attributes->set('tenant_id', $finalTenantId);
-        
-        // Log para auditoría (solo en desarrollo, en producción solo errores)
-        if (app()->environment('local', 'development')) {
-            Log::info('Tenant identificado', [
+        if (!$tenant) {
+            Log::warning('Tenant no encontrado', [
                 'host' => $host,
-                'tenant_id' => $finalTenantId,
+                'subdomain' => $subdomain,
                 'ip' => $request->ip()
             ]);
+            abort(404, 'Tenant no encontrado');
+        }
+        
+        // Configurar conexión a la BD del tenant
+        try {
+            Tenant::configureTenantConnection($tenant);
+            
+            // Establecer el tenant en el contenedor de servicios
+            app()->instance('currentTenant', $tenant);
+            
+            // También lo guardamos en el request para fácil acceso
+            $request->attributes->set('tenant', $tenant);
+            $request->attributes->set('tenant_id', $tenant->tenant_id);
+            
+            // Log para auditoría (solo en desarrollo)
+            if (app()->environment('local', 'development')) {
+                Log::info('Tenant conectado', [
+                    'host' => $host,
+                    'tenant_id' => $tenant->tenant_id,
+                    'database' => $tenant->database_name,
+                    'ip' => $request->ip()
+                ]);
+            }
+            
+        } catch (\Exception $e) {
+            Log::error('Error configurando conexión de tenant', [
+                'tenant_id' => $tenant->tenant_id,
+                'error' => $e->getMessage(),
+                'host' => $host
+            ]);
+            abort(500, 'Error de configuración del tenant');
         }
 
         return $next($request);
     }
     
     /**
-     * Extrae el tenant ID del host de forma segura
+     * Extrae el subdominio del host de forma segura
      */
-    private function extractTenantId(string $host, string $baseDomain): ?string
+    private function extractSubdomain(string $host, string $baseDomain): ?string
     {
         // Si el host es exactamente el dominio base, no hay tenant
         if ($host === $baseDomain) {

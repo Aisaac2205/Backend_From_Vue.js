@@ -4,29 +4,26 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Traits\TenantScope;
-
 
 class Tarea extends Model
 {
-    use HasFactory, TenantScope;
+    use HasFactory;
 
     protected $fillable = [
-        'tenant_id', // Agregar tenant_id para multitenancy
         'titulo',
         'descripcion',
         'estado',
-        'fecha_vencimiento',
-        'user_id'
+        'fecha_limite',
+        'usuario_id'
     ];
 
     protected $casts = [
-        'fecha_vencimiento' => 'date',
+        'fecha_limite' => 'date',
     ];
 
     // Relación con Usuario
-    public function user()
+    public function usuario()
     {
-        return $this->belongsTo(Usuario::class, 'user_id');
+        return $this->belongsTo(Usuario::class, 'usuario_id');
     }
 }

@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\UsuarioController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\TareaController;
+use App\Http\Controllers\TenantController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -53,4 +54,18 @@ Route::prefix('tareas')->middleware(['identify.tenant', 'auth:sanctum', 'validat
     Route::get('/{id}', [TareaController::class, 'show']);
     Route::put('/{id}', [TareaController::class, 'update']);
     Route::delete('/{id}', [TareaController::class, 'destroy']);
+});
+
+// ==========================================
+// RUTAS DE GESTIÓN DE TENANTS (SOLO ADMINISTRADORES)
+// ==========================================
+// IMPORTANTE: Estas rutas solo funcionan desde el dominio principal (sin subdominio)
+// para evitar que un tenant administre otros tenants
+
+Route::prefix('admin/tenants')->middleware(['auth:sanctum', 'validate.origin'])->group(function () {
+    Route::get('/', [TenantController::class, 'index']);           // Listar todos los tenants
+    Route::post('/', [TenantController::class, 'store']);          // Crear nuevo tenant
+    Route::get('/{tenantId}', [TenantController::class, 'show']);  // Ver tenant específico
+    Route::put('/{tenantId}', [TenantController::class, 'update']); // Actualizar tenant
+    Route::delete('/{tenantId}', [TenantController::class, 'destroy']); // Eliminar tenant
 });

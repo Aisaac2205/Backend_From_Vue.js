@@ -1,11 +1,11 @@
         // Plantilla para conexiones dinámicas de tenants
         'tenant' => [
             'driver' => 'mysql',
-            'host' => env('TENANT_DB_HOST', '127.0.0.1'),
-            'port' => env('TENANT_DB_PORT', '3306'),
-            'database' => '', // Se asigna dinámicamente
-            'username' => '', // Se asigna dinámicamente
-            'password' => '', // Se asigna dinámicamente
+            'host' => env('TENANT_DB_HOST', env('DB_HOST', '127.0.0.1')),
+            'port' => env('TENANT_DB_PORT', env('DB_PORT', '3306')),
+            'database' => '', // Se asigna dinámicamente por el modelo Tenant
+            'username' => '', // Se asigna dinámicamente por el modelo Tenant
+            'password' => '', // Se asigna dinámicamente por el modelo Tenant
             'unix_socket' => env('DB_SOCKET', ''),
             'charset' => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',

@@ -52,12 +52,20 @@ Route::prefix('usuarios')->middleware(['identify.tenant', 'auth:sanctum', 'valid
 Route::get('/usuarios/addUser', [UsuarioController::class, 'createUserForm']);
 
 
+// Rutas temporales para testing local (SIN multitenancy)
+Route::prefix('test')->group(function () {
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
+    Route::get('/login', [AuthController::class, 'loginForm']);
+    Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
+});
+
 // Agrupar rutas de autenticación bajo identify.tenant
 Route::middleware(['identify.tenant'])->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     // Limitar a 5 intentos por minuto para evitar fuerza bruta
     Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
-    Route::get('/login', [AuthController::class, 'loginForm']); // Para testing desde navegador
+    Route::get('/login', [AuthController::class, 'loginForm']); // Para testing desde navegador  
     Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
 });
 

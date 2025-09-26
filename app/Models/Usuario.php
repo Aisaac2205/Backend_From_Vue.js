@@ -14,16 +14,38 @@ class Usuario extends Authenticatable
     protected $table = 'usuarios'; // Nombre exacto de la tabla
 
     protected $fillable = [
-        'name',
+        'nombre',
         'email',
         'password',
-        'role',
+        'rol',
     ];
 
     // Ocultar campos sensibles al devolver el modelo en JSON
     protected $hidden = [
         'password',
     ];
+
+    // Accesores para compatibilidad con el frontend
+    public function getNameAttribute()
+    {
+        return $this->nombre;
+    }
+    
+    public function getRoleAttribute()
+    {
+        return $this->rol;
+    }
+    
+    // Mutadores para compatibilidad
+    public function setNameAttribute($value)
+    {
+        $this->attributes['nombre'] = $value;
+    }
+    
+    public function setRoleAttribute($value)
+    {
+        $this->attributes['rol'] = $value;
+    }
 
     // Relación con Tareas
     public function tareas()

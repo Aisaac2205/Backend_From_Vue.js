@@ -12,6 +12,9 @@ class UsuarioController extends Controller
 {
     /**
      * Validar que el usuario esté autenticado
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse|null
      */
     private function validateAuthentication(Request $request)
     {

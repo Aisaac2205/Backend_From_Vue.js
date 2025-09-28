@@ -2,7 +2,12 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
+use App\        $validated = $request->validate([
+            'titulo' => 'required|string|max:255',
+            'descripcion' => 'nullable|string',
+            'estado' => 'required|in:pendiente,en_progreso,completada',
+            'fecha_vencimiento' => 'nullable|date',
+            'user_id' => 'required|exists:usuarios,id'ontrollers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Tarea;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -55,7 +60,7 @@ class TareaController extends Controller
             'descripcion' => 'nullable|string',
             'estado' => 'in:pendiente,en_progreso,completada',
             'fecha_vencimiento' => 'nullable|date',
-            'usuario_id' => 'required|exists:usuarios,id'
+            'user_id' => 'required|exists:usuarios,id'
         ]);
 
         $tarea = Tarea::create($validated);
@@ -111,7 +116,7 @@ class TareaController extends Controller
             'descripcion' => 'nullable|string',
             'estado' => 'in:pendiente,en_progreso,completada',
             'fecha_vencimiento' => 'nullable|date',
-            'usuario_id' => 'exists:usuarios,id'
+            'user_id' => 'exists:usuarios,id'
         ]);
 
         $tarea->update($validated);
@@ -139,7 +144,7 @@ class TareaController extends Controller
         }
 
         // Los usuarios pueden eliminar solo sus propias tareas, los admins pueden eliminar cualquier tarea
-        if ($currentUser->rol !== 'admin' && $tarea->usuario_id !== $currentUser->id) {
+        if ($currentUser->rol !== 'admin' && $tarea->user_id !== $currentUser->id) {
             return response()->json([
                 'message' => 'No tienes permisos para eliminar esta tarea',
                 'status' => false

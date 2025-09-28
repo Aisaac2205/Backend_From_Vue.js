@@ -170,9 +170,15 @@ class UsuarioController extends Controller
      */
     public function destroy(Request $request, string $id)
     {
+        // Validar autenticación
+        $authResponse = $this->validateAuthentication($request);
+        if ($authResponse) {
+            return $authResponse;
+        }
+
         // Solo los admins pueden eliminar usuarios
         $currentUser = $request->user();
-        if (!$currentUser || $currentUser->rol !== 'admin') {
+        if ($currentUser->rol !== 'admin') {
             return response()->json([
                 'message' => 'No tienes permisos para eliminar usuarios. Solo los administradores pueden hacerlo.',
                 'status' => false
@@ -183,15 +189,15 @@ class UsuarioController extends Controller
             $usuario = Usuario::findOrFail($id);
             
             // Prevenir que un admin se elimine a sí mismo
-            if ($usuario->id === $currentUser->id) {
+            if ($usuario->id == $currentUser->id) {
                 return response()->json([
                     'message' => 'No puedes eliminarte a ti mismo.',
                     'status' => false
                 ], 422);
             }
             
-            // Eliminar tareas asociadas al usuario primero
-            \App\Models\Tarea::where('usuario_id', $usuario->id)->delete();
+            // Eliminar usando la relación del modelo para evitar problemas de FK
+            $usuario->tareas()->delete();
             
             $usuario->delete();
             
@@ -206,8 +212,9 @@ class UsuarioController extends Controller
             ], 404);
         } catch (\Exception $e) {
             \Log::error('Error en UsuarioController@destroy: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
             return response()->json([
-                'message' => 'Error al eliminar el usuario',
+                'message' => 'Error al eliminar el usuario: ' . $e->getMessage(),
                 'status' => false
             ], 500);
         }

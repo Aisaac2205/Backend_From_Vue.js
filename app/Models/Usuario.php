@@ -11,7 +11,12 @@ class Usuario extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    protected $table = 'usuarios'; // Nombre exacto de la tabla
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'usuarios';
 
     protected $fillable = [
         'nombre',

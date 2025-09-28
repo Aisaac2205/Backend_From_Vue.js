@@ -8,6 +8,13 @@ use Illuminate\Auth\AuthenticationException;
 
 class ApiAuthentication
 {
+    /**
+     * Handle an incoming request.
+     *
+     * @param Request $request
+     * @param Closure $next
+     * @return mixed
+     */
     public function handle(Request $request, Closure $next)
     {
         try {

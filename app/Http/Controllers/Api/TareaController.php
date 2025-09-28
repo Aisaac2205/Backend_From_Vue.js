@@ -49,14 +49,33 @@ class TareaController extends Controller
      */
     public function store(Request $request)
     {
+        // Validar autenticación
+        $authResponse = $this->validateAuthentication($request);
+        if ($authResponse) {
+            return $authResponse;
+        }
+
         // Validación mejorada con mensajes personalizados
         $validated = $request->validate([
             'titulo' => 'required|string|max:200',
             'descripcion' => 'nullable|string',
             'estado' => 'in:pendiente,en_progreso,completada',
             'fecha_vencimiento' => 'nullable|date',
-            'user_id' => 'required|exists:usuarios,id'
+            'usuario_id' => 'nullable|exists:usuarios,id' // Opcional desde frontend
         ]);
+
+        // Asignar automáticamente el usuario autenticado si no se especifica otro
+        $currentUser = $request->user();
+        
+        // Si es admin y especifica usuario_id, usarlo; sino usar el usuario actual
+        if ($currentUser->rol === 'admin' && isset($validated['usuario_id'])) {
+            $validated['user_id'] = $validated['usuario_id'];
+        } else {
+            $validated['user_id'] = $currentUser->id;
+        }
+        
+        // Remover usuario_id del array porque la BD usa user_id
+        unset($validated['usuario_id']);
 
         $tarea = Tarea::create($validated);
         
@@ -97,6 +116,12 @@ class TareaController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        // Validar autenticación
+        $authResponse = $this->validateAuthentication($request);
+        if ($authResponse) {
+            return $authResponse;
+        }
+
         $tarea = Tarea::find($id);
         
         if (!$tarea) {
@@ -106,13 +131,28 @@ class TareaController extends Controller
             ], 404);
         }
 
+        // Verificar permisos
+        $currentUser = $request->user();
+        if ($currentUser->rol !== 'admin' && $tarea->user_id != $currentUser->id) {
+            return response()->json([
+                'message' => 'No tienes permisos para editar esta tarea',
+                'status' => false
+            ], 403);
+        }
+
         $validated = $request->validate([
             'titulo' => 'string|max:200',
             'descripcion' => 'nullable|string',
             'estado' => 'in:pendiente,en_progreso,completada',
             'fecha_vencimiento' => 'nullable|date',
-            'user_id' => 'exists:usuarios,id'
+            'usuario_id' => 'nullable|exists:usuarios,id'
         ]);
+
+        // Manejar el cambio de usuario (solo admins)
+        if (isset($validated['usuario_id']) && $currentUser->rol === 'admin') {
+            $validated['user_id'] = $validated['usuario_id'];
+        }
+        unset($validated['usuario_id']);
 
         $tarea->update($validated);
         

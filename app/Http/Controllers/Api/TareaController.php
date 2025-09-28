@@ -2,12 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\        $validated = $request->validate([
-            'titulo' => 'required|string|max:255',
-            'descripcion' => 'nullable|string',
-            'estado' => 'required|in:pendiente,en_progreso,completada',
-            'fecha_vencimiento' => 'nullable|date',
-            'user_id' => 'required|exists:usuarios,id'ontrollers\Controller;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Tarea;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;

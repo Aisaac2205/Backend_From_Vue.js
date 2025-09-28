@@ -20,11 +20,13 @@ return [
     'allowed_methods' => ['*'],
 
     'allowed_origins' => [
-        env('FRONTEND_URL', 'http://localhost:3000'),
-        'http://localhost:5173', // Vite dev server
+        env('FRONTEND_URL', 'http://ec2-18-219-51-191.us-east-2.compute.amazonaws.com'),
+        'http://localhost:5173', // Vite dev server (para desarrollo local)
         'http://127.0.0.1:5173',
         'http://localhost:8000',
         'http://127.0.0.1:8000',
+        'http://ec2-18-219-51-191.us-east-2.compute.amazonaws.com',
+        'https://ec2-18-219-51-191.us-east-2.compute.amazonaws.com',
     ],
 
     'allowed_origins_patterns' => [],

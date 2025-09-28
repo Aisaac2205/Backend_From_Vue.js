@@ -28,8 +28,14 @@ class TareaController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        // Validar autenticación
+        $authError = $this->validateAuthentication($request);
+        if ($authError) {
+            return $authError;
+        }
+
         return response()->json(Tarea::with('usuario')->get());
     }
 
@@ -49,14 +55,22 @@ class TareaController extends Controller
      */
     public function store(Request $request)
     {
+        // Validar autenticación
+        $authError = $this->validateAuthentication($request);
+        if ($authError) {
+            return $authError;
+        }
+
         // Validación mejorada con mensajes personalizados
         $validated = $request->validate([
             'titulo' => 'required|string|max:200',
             'descripcion' => 'nullable|string',
             'estado' => 'in:pendiente,en_progreso,completada',
-            'fecha_vencimiento' => 'nullable|date',
-            'usuario_id' => 'required|exists:usuarios,id'
+            'fecha_vencimiento' => 'nullable|date'
         ]);
+
+        // Asignar automáticamente el usuario autenticado
+        $validated['user_id'] = $request->user()->id;
 
         $tarea = Tarea::create($validated);
         

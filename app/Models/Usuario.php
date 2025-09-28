@@ -35,6 +35,6 @@ class Usuario extends Authenticatable
      */
     public function tareas()
     {
-        return $this->hasMany(Tarea::class, 'usuario_id');
+        return $this->hasMany(Tarea::class, 'user_id');
     }
 }

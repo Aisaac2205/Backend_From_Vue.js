@@ -16,7 +16,11 @@ class Tarea extends Model
         'descripcion',
         'estado',
         'fecha_vencimiento',
-        'usuario_id'
+        'user_id'
+    ];
+
+    protected $attributes = [
+        'fecha_vencimiento' => null,
     ];
 
     protected $casts = [
@@ -26,6 +30,6 @@ class Tarea extends Model
     // Relación con Usuario
     public function usuario()
     {
-        return $this->belongsTo(Usuario::class);
+        return $this->belongsTo(Usuario::class, 'user_id');
     }
 }

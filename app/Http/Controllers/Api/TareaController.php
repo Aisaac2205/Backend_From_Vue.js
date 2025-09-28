@@ -43,9 +43,13 @@ class TareaController extends Controller
 
     /**
      * Store a newly created resource in storage.
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
     {
+        // Validación mejorada con mensajes personalizados
         $validated = $request->validate([
             'titulo' => 'required|string|max:200',
             'descripcion' => 'nullable|string',
